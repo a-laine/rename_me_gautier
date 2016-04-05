@@ -7,10 +7,15 @@
 
 #include "global.h"
 
-RT_TASK tServeur;
+RT_TASK tcommunicate;
 RT_TASK tconnect;
 RT_TASK tmove;
-RT_TASK tenvoyer;
+RT_TASK tsend;
+RT_TASK twatchdog;
+RT_TASK tbattery;
+RT_TASK tcam;
+RT_TASK tposition;
+RT_TASK tarena;
 
 RT_MUTEX mutexEtat;
 RT_MUTEX mutexMove;
@@ -28,7 +33,12 @@ DServer *serveur;
 
 int MSG_QUEUE_SIZE = 10;
 
-int PRIORITY_TSERVEUR = 30;
+int PRIORITY_TCOMMUNICATE = 30;
 int PRIORITY_TCONNECT = 20;
 int PRIORITY_TMOVE = 10;
-int PRIORITY_TENVOYER = 25;
+int PRIORITY_TSEND = 25;
+int PRIORITY_TWATCHDOG = 0;
+int PRIORITY_TBATTERY = 0;
+int PRIORITY_TCAM = 0;
+int PRIORITY_TPOSITION = 0;
+int PRIORITY_TARENA = 0;

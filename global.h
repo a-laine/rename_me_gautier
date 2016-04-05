@@ -11,10 +11,15 @@
 #include "includes.h"
 
 /* @descripteurs des tâches */
-extern RT_TASK tServeur;
+extern RT_TASK tcommunicate;
 extern RT_TASK tconnect;
 extern RT_TASK tmove;
-extern RT_TASK tenvoyer;
+extern RT_TASK tsend;
+extern RT_TASK twatchdog;
+extern RT_TASK tbattery;
+extern RT_TASK tcam;
+extern RT_TASK tposition;
+extern RT_TASK tarena;
 
 /* @descripteurs des mutex */
 extern RT_MUTEX mutexEtat;
@@ -35,10 +40,15 @@ extern DMovement *move;
 
 /* @constantes */
 extern int MSG_QUEUE_SIZE;
-extern int PRIORITY_TSERVEUR;
+extern int PRIORITY_TCOMMUNICATE;
 extern int PRIORITY_TCONNECT;
 extern int PRIORITY_TMOVE;
-extern int PRIORITY_TENVOYER;
+extern int PRIORITY_TSEND;
+extern int PRIORITY_TWATCHDOG;
+extern int PRIORITY_TBATTERY;
+extern int PRIORITY_TCAM;
+extern int PRIORITY_TPOSITION;
+extern int PRIORITY_TARENA;
 
 #endif	/* GLOBAL_H */
 
