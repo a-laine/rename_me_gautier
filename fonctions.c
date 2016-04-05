@@ -164,9 +164,25 @@ void deplacer(void *arg) {
     }
 }
 
+int test_robot_state(RobotStatus res) {
+	int status;
+	rt_mutex_acquire(&mutexEtat, TM_INFINITE);
+	if (res != STATUS_OK) {
+        etat_communication->cpt++;
+	}
+	if (etat_communication->cpt < 3) {
+		status = 1;
+	} else {
+		status = 0;
+	}
+	rt_mutex_release(&mutexEtat);
+	return status;
+}
+
 void watchdog(void *arg)
 {
 	int status = 1;
+	RobotStatus res;
     DMessage *message;
 
     rt_printf("twatchdog : Debut de l'exécution de twatchdog\n");
@@ -178,30 +194,19 @@ void watchdog(void *arg)
 		sleep(1);
 		while (status == 1) {
 			rt_mutex_acquire(&mutexRobot, TM_INFINITE);
-            status = robot->reload_wdt(robot);
+            res = robot->reload_wdt(robot);
 			rt_mutex_release(&mutexRobot);
+			status = test_robot_state(res);
 		}
-        /*status = robot->open_device(robot);
-        rt_mutex_acquire(&mutexEtat, TM_INFINITE);
-        etat_communication->robot = status;
-        rt_mutex_release(&mutexEtat);
-
-        if (status == STATUS_OK) {
-            status = robot->start_insecurely(robot);
-            if (status == STATUS_OK){
-                rt_printf("tconnect : Robot démarrer\n");
-            }
-        }
-
         message = d_new_message();
         message->put_state(message, status);
 
-        rt_printf("tconnecter : Envoi message\n");
+        rt_printf("twatchdog : Envoi message\n");
         message->print(message, 100);
 
         if (write_in_queue(&queueMsgGUI, message, sizeof (DMessage)) < 0) {
             message->free(message);
-        }*/
+        }
     }
 }
 
