@@ -10,7 +10,7 @@ void envoyer(void * arg) {
         rt_printf("tenvoyer : Attente d'un message\n");
         if ((err = rt_queue_read(&queueMsgGUI, &msg, sizeof (DMessage), TM_INFINITE)) >= 0) {
             rt_printf("tenvoyer : envoi d'un message au moniteur\n");
-            serveur->send(serveur, msg);
+            server->send(server, msg);
             msg->free(msg);
         } else {
             rt_printf("Error msg queue write: %s\n", strerror(-err));
@@ -59,46 +59,71 @@ void connecter(void * arg) {
 
 void communiquer(void *arg) {
     DMessage *msg = d_new_message();
-    int var1 = 1;
+    int size = 1;
     int num_msg = 0;
 
-    rt_printf("tserver : Début de l'exécution de serveur\n");
-    serveur->open(serveur, "8000");
-    rt_printf("tserver : Connexion\n");
-
+    /* Connexion */
+    rt_printf("tcommunicate : Début de l'exécution du Serveur\n");
+    server->open(server, "8000"); //ouvrir la connexion, DServer *serveur;
+    rt_print("tcommunicate : Connexion\n");
+    
+    /* Etat */
     rt_mutex_acquire(&mutexEtat, TM_INFINITE);
-    etat_communication->moniteur = 0;
+    etat_communication = 0;
     rt_mutex_release(&mutexEtat);
 
-    while (var1 > 0) {
-        rt_printf("tserver : Attente d'un message\n");
-        var1 = serveur->receive(serveur, msg);
-        num_msg++;
-        if (var1 > 0) {
-            switch (msg->get_type(msg)) {
-                case MESSAGE_TYPE_ACTION:
-                    rt_printf("tserver : Le message %d reçu est une action\n",
-                            num_msg);
-                    DAction *action = d_new_action();
-                    action->from_message(action, msg);
-                    switch (action->get_order(action)) {
-                        case ACTION_CONNECT_ROBOT:
-                            rt_printf("tserver : Action connecter robot\n");
-                            rt_sem_v(&semConnecterRobot);
-                            break;
-                    }
-                    break;
-                case MESSAGE_TYPE_MOVEMENT:
-                    rt_printf("tserver : Le message reçu %d est un mouvement\n",
-                            num_msg);
-                    rt_mutex_acquire(&mutexMove, TM_INFINITE);
-                    move->from_message(move, msg);
-                    move->print(move);
-                    rt_mutex_release(&mutexMove);
-                    break;
-            }
-        }
+    while (size > 0) {
+      rt_printf("tcommunicate : Attente d'un message\n");
+      size = server->receive(server, msg);
+      num_msg++;
+      
+      if (size > 0) {
+	switch (msg->get_type(msg)) {
+	
+	  /* Type::Action */
+	case MESSAGE_TYPE_ACTION:
+	  rt_printf("tcommunicate : Le message %d reçu est une action\n",
+		    num_msg);
+	  DAction *action = d_new_action();
+	  action->from_message(action, msg);
+	  switch (action->get_order(action)) {
+	    /* Type::Action::Connect */
+	  case ACTION_CONNECT_ROBOT:
+	    rt_printf("tcommunicate : Action 'connecter robot'\n");
+	    rt_sem_v(&semConnecterRobot);
+	    break;
+	    /* Type::Action::FindArena */
+	  case ACTION_FIND_ARENA:
+	    rt_printf("tcommunicate : Action 'demander acquisition'\n");
+	    rt_sem_v(&semAcquArene);
+	    break;
+	    /* Type::Action::ArenaFound */
+	    rt_printf("tcommunicate : Action 'valider arene'\n");
+	    rt_sem_v(&semValidArene);
+	    rt_mutex_acquire(&mutexEtat, TM_INFINITE);
+	    //areneValidee = 0;
+	    rt_mutex_release(&mutexEtat);
+	    break;
+	  }
+	  break;
+	  
+	  /* Type::Mouvement */
+	case MESSAGE_TYPE_MOVEMENT:
+	  rt_printf("tcommunicate : Le message reçu %d est un mouvement\n",
+		    num_msg);
+	  rt_mutex_acquire(&mutexMove, TM_INFINITE);
+	  mvt->from_message(mvt, msg);
+	  mvt->print(mvt);
+	  rt_mutex_release(&mutexMove);
+	  break;
+      
+    /* Message Mouvement */
+
+    /* Message ordre */
+	}
+      }
     }
+    
 }
 
 void deplacer(void *arg) {
@@ -121,7 +146,7 @@ void deplacer(void *arg) {
 
         if (status == STATUS_OK) {
             rt_mutex_acquire(&mutexMove, TM_INFINITE);
-            switch (move->get_direction(move)) {
+            switch (mvt->get_direction(mvt)) {
                 case DIRECTION_FORWARD:
                     gauche = MOTEUR_ARRIERE_LENT;
                     droite = MOTEUR_ARRIERE_LENT;

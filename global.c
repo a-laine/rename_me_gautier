@@ -23,12 +23,14 @@ RT_MUTEX mutexRobot;
 
 RT_SEM semConnecterRobot;
 RT_SEM semWatchdog;
+RT_SEM semAcquArene;
+RT_SEM semValidArene;
 
 RT_QUEUE queueMsgGUI;
 
 DRobot *robot;
-DMovement *move;
-DServer *serveur;
+DMovement *mvt;
+DServer *server;
 Etat_communication_t *etat_communication;
 
 int MSG_QUEUE_SIZE = 10;

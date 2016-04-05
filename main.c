@@ -114,8 +114,8 @@ void initStruct(void) {
 
     /* Creation des structures globales du projet */
     robot = d_new_robot();
-    move = d_new_movement();
-    serveur = d_new_server();
+    mvt = d_new_movement();
+    server = d_new_server();
 }
 
 void startTasks() {
