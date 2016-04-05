@@ -18,6 +18,12 @@ extern "C" {
         void communiquer(void *arg);
         void deplacer(void *arg);
         void envoyer(void *arg);
+        void watchdog(void *arg);
+        void position_robot(void *arg);
+        void batterie(void *arg);
+        void arene(void *arg);
+        void webcam(void *arg);
+        void mission(void *arg);
 #ifdef	__cplusplus
 }
 #endif

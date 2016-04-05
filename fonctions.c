@@ -160,6 +160,36 @@ void deplacer(void *arg) {
     }
 }
 
+void watchdog(void *arg)
+{
+	
+}
+
+void position_robot(void *arg);
+{
+	
+}
+
+void batterie(void *arg)
+{
+	
+}
+
+void arene(void *arg)
+{
+	
+}
+
+void webcam(void *arg)
+{
+	
+}
+
+void mission(void *arg)
+{
+	
+}
+
 int write_in_queue(RT_QUEUE *msgQueue, void * data, int size) {
     void *msg;
     int err;
