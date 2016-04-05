@@ -43,7 +43,7 @@ typedef struct Etat_communication_t {
 	int moniteur;
 	int cpt;
 } Etat_communication_t;
-extern Etat_communication_t *etat_communication;
+extern Etat_communication_t *etatCommunication;
 
 /* @constantes */
 extern int MSG_QUEUE_SIZE;

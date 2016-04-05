@@ -27,7 +27,7 @@ RT_QUEUE queueMsgGUI;
 DRobot *robot;
 DMovement *move;
 DServer *serveur;
-Etat_communication_t *etat_communication;
+etatCommunicationType *etatCommunication;
 
 int MSG_QUEUE_SIZE = 10;
 

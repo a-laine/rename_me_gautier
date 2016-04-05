@@ -145,7 +145,7 @@ void deplacer(void *arg) {
 
             if (status != STATUS_OK) {
                 rt_mutex_acquire(&mutexEtat, TM_INFINITE);
-                etat_communication->robot = status;
+                etatCommRobot = status;
                 rt_mutex_release(&mutexEtat);
 
                 message = d_new_message();
