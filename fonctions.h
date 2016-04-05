@@ -14,13 +14,13 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif
-        void connecter (void * arg);
+        void connecter(void *arg);
         void communiquer(void *arg);
         void deplacer(void *arg);
         void envoyer(void *arg);
         void watchdog(void *arg);
-        void position_robot(void *arg);
-        void batterie(void *arg);
+        void position(void *arg);
+        void batteries(void *arg);
         void arene(void *arg);
         void webcam(void *arg);
         void mission(void *arg);

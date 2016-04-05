@@ -58,9 +58,16 @@ void communiquer(void *arg) {
     int var1 = 1;
     int num_msg = 0;
 
-    rt_printf("tserver : Début de l'exécution de serveur\n");
-    serveur->open(serveur, "8000");
-    rt_printf("tserver : Connexion\n");
+    /* Connexion */
+    rt_printf("tcommunicate : Début de l'exécution du Serveur\n");
+    serveur->open(serveur, "8000"); //ouvrir la connexion, DServer *serveur;
+    rt_print("tcommunicate : Connexion\n");
+
+    /* Message Action */
+
+    /* Message Mouvement */
+
+    /* Message ordre */
 
     rt_mutex_acquire(&mutexEtat, TM_INFINITE);
     etatCommMoniteur = 0;
@@ -96,6 +103,8 @@ void communiquer(void *arg) {
         }
     }
 }
+
+void 
 
 void deplacer(void *arg) {
     int status = 1;
@@ -160,36 +169,6 @@ void deplacer(void *arg) {
     }
 }
 
-void watchdog(void *arg)
-{
-	
-}
-
-void position(void *arg)
-{
-	
-}
-
-void batteries(void *arg)
-{
-	
-}
-
-void arene(void *arg)
-{
-	
-}
-
-void webcam(void *arg)
-{
-	
-}
-
-void mission(void *arg)
-{
-	
-}
-
 int write_in_queue(RT_QUEUE *msgQueue, void * data, int size) {
     void *msg;
     int err;
@@ -204,3 +183,5 @@ int write_in_queue(RT_QUEUE *msgQueue, void * data, int size) {
 
     return err;
 }
+
+

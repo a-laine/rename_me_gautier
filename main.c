@@ -159,7 +159,13 @@ void startTasks() {
 }
 
 void deleteTasks() {
-    rt_task_delete(&tServeur);
-    rt_task_delete(&tconnect);
-    rt_task_delete(&tmove);
+  rt_task_delete(&tcommunicate);
+  rt_task_delete(&tconnect);
+  rt_task_delete(&tmove);    
+  rt_task_delete(&tsend);
+  rt_task_delete(&twatchdog);
+  rt_task_delete(&tcam);    
+  rt_task_delete(&tarena);
+  rt_task_delete(&tposition);
+  rt_task_delete(&tbattery);
 }
