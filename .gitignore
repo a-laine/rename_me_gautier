@@ -1,3 +1,7 @@
+# Nabil
+*.c~
+*.h~
+
 # Object files
 *.o
 *.ko
