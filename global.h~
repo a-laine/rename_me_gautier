@@ -27,6 +27,7 @@ extern RT_MUTEX mutexMove;
 
 /* @descripteurs des sempahore */
 extern RT_SEM semConnecterRobot;
+extern RT_SEM semWatchdog;
 
 /* @descripteurs des files de messages */
 extern RT_QUEUE queueMsgGUI;
@@ -43,7 +44,7 @@ typedef struct Etat_communication_t {
 	int moniteur;
 	int cpt;
 } Etat_communication_t;
-extern Etat_communication_t *etatCommunication;
+extern Etat_communication_t *etat_communication;
 
 /* @constantes */
 extern int MSG_QUEUE_SIZE;

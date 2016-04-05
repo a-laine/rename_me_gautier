@@ -28,14 +28,18 @@ void connecter(void * arg) {
         rt_printf("tconnect : Attente du sémarphore semConnecterRobot\n");
         rt_sem_p(&semConnecterRobot, TM_INFINITE);
         rt_printf("tconnect : Ouverture de la communication avec le robot\n");
+		rt_mutex_acquire(&mutexRobot, TM_INFINITE);
         status = robot->open_device(robot);
+		rt_mutex_release(&mutexRobot);
 
         rt_mutex_acquire(&mutexEtat, TM_INFINITE);
         etat_communication->robot = status;
         rt_mutex_release(&mutexEtat);
 
         if (status == STATUS_OK) {
+			rt_mutex_acquire(&mutexRobot, TM_INFINITE);
             status = robot->start_insecurely(robot);
+			rt_mutex_release(&mutexRobot);
             if (status == STATUS_OK){
                 rt_printf("tconnect : Robot démarrer\n");
             }
@@ -162,7 +166,43 @@ void deplacer(void *arg) {
 
 void watchdog(void *arg)
 {
-	
+	int status = 1;
+    DMessage *message;
+
+    rt_printf("twatchdog : Debut de l'exécution de twatchdog\n");
+
+    while (1) {
+        rt_printf("twatchdog : Attente du sémarphore semWatchdog\n");
+        rt_sem_p(&semWatchdog, TM_INFINITE);
+        rt_printf("twatchdog : Ouverture de la communication avec le robot\n");
+		sleep(1);
+		while (status == 1) {
+			rt_mutex_acquire(&mutexRobot, TM_INFINITE);
+            status = robot->reload_wdt(robot);
+			rt_mutex_release(&mutexRobot);
+		}
+        /*status = robot->open_device(robot);
+        rt_mutex_acquire(&mutexEtat, TM_INFINITE);
+        etat_communication->robot = status;
+        rt_mutex_release(&mutexEtat);
+
+        if (status == STATUS_OK) {
+            status = robot->start_insecurely(robot);
+            if (status == STATUS_OK){
+                rt_printf("tconnect : Robot démarrer\n");
+            }
+        }
+
+        message = d_new_message();
+        message->put_state(message, status);
+
+        rt_printf("tconnecter : Envoi message\n");
+        message->print(message, 100);
+
+        if (write_in_queue(&queueMsgGUI, message, sizeof (DMessage)) < 0) {
+            message->free(message);
+        }*/
+    }
 }
 
 void position(void *arg)
