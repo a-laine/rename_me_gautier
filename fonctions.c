@@ -215,9 +215,39 @@ void position(void *arg)
 	
 }
 
+/* Author : Aurélien Lainé
+ * State : En cours
+ */
 void batteries(void *arg)
 {
+	int status;
+	int vbat;
+	DBattery* batterie = d_new_battery();
+	DMessage *message;
 	
+	while(2)
+	{
+		rt_task_wait_period(NULL);
+		
+		// verifier la communication
+		rt_mutex_acquire(&mutexEtat, TM_INFINITE);
+		status = etat_communication->robot;
+		rt_mutex_release(&mutexEtat);
+		if(status == 1)
+		{
+			// TODO GERER LES ERREURS
+		}
+		
+		rt_mutex_acquire(&mutexRobot, TM_INFINITE);
+        status = robot->get_vbat(robot, &vbat);
+		rt_mutex_release(&mutexRobot);
+		batterie->set_level(batterie, vbat);
+		message = d_new_message();
+		message->put_battery_level(message, batterie);
+		
+		rt_printf("tbatteries : Envoi message\n");
+		message->print(message, 100);
+    }
 }
 
 void arene(void *arg)
