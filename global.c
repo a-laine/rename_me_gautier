@@ -20,6 +20,7 @@ RT_TASK tarena;
 RT_MUTEX mutexEtat;
 RT_MUTEX mutexMove;
 RT_MUTEX mutexRobot;
+RT_MUTEX mutexServer;
 
 RT_SEM semConnecterRobot;
 RT_SEM semWatchdog;

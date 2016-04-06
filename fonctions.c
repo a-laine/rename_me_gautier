@@ -2,6 +2,9 @@
 
 int write_in_queue(RT_QUEUE *msgQueue, void * data, int size);
 
+/* Author : Gautier Delorme
+ * State : done
+ */
 void envoyer(void * arg) {
     DMessage *msg;
     int err;
@@ -10,8 +13,10 @@ void envoyer(void * arg) {
         rt_printf("tenvoyer : Attente d'un message\n");
         if ((err = rt_queue_read(&queueMsgGUI, &msg, sizeof (DMessage), TM_INFINITE)) >= 0) {
             rt_printf("tenvoyer : envoi d'un message au moniteur\n");
-            server->send(server, msg);
+			rt_mutex_acquire(&mutexServer, TM_INFINITE);
+       		server->send(server, msg);
             msg->free(msg);
+			rt_mutex_release(&mutexServer);
         } else {
             rt_printf("Error msg queue write: %s\n", strerror(-err));
         }

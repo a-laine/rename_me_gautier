@@ -25,6 +25,7 @@ extern RT_TASK tarena;
 extern RT_MUTEX mutexEtat;
 extern RT_MUTEX mutexMove;
 extern RT_MUTEX mutexRobot;
+extern RT_MUTEX mutexServer;
 
 /* @descripteurs des sempahore */
 extern RT_SEM semConnecterRobot;
