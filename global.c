@@ -21,11 +21,13 @@ RT_TASK tmission;
 RT_MUTEX mutexEtat;
 RT_MUTEX mutexMove;
 RT_MUTEX mutexRobot;
+RT_MUTEX mutexServer;
 
 RT_SEM semConnecterRobot;
 RT_SEM semWatchdog;
 RT_SEM semAcquArene;
 RT_SEM semValidArene;
+RT_SEM semBattery;
 
 RT_QUEUE queueMsgGUI;
 

@@ -26,12 +26,14 @@ extern RT_TASK tmission;
 extern RT_MUTEX mutexEtat;
 extern RT_MUTEX mutexMove;
 extern RT_MUTEX mutexRobot;
+extern RT_MUTEX mutexServer;
 
 /* @descripteurs des sempahore */
 extern RT_SEM semConnecterRobot;
 extern RT_SEM semWatchdog;
 extern RT_SEM semAcquArene;
 extern RT_SEM semValidArene;
+extern RT_SEM semBattery;
 
 /* @descripteurs des files de messages */
 extern RT_QUEUE queueMsgGUI;

@@ -2,22 +2,31 @@
 
 int write_in_queue(RT_QUEUE *msgQueue, void * data, int size);
 
+/* Author : Gautier Delorme
+ * State : done
+ */
 void envoyer(void * arg) {
     DMessage *msg;
     int err;
 
     while (1) {
-        rt_printf("tenvoyer : Attente d'un message\n");
+		rt_task_set_periodic(NULL, TM_NOW, 200e+6);
+ 		rt_printf("tenvoyer : hello\n");
         if ((err = rt_queue_read(&queueMsgGUI, &msg, sizeof (DMessage), TM_INFINITE)) >= 0) {
             rt_printf("tenvoyer : envoi d'un message au moniteur\n");
-            server->send(server, msg);
+			rt_mutex_acquire(&mutexServer, TM_INFINITE);
+       		server->send(server, msg);
             msg->free(msg);
+			rt_mutex_release(&mutexServer);
         } else {
             rt_printf("Error msg queue write: %s\n", strerror(-err));
         }
     }
 }
 
+/* Author : Gautier Delorme
+ * State : done
+ */
 void connecter(void * arg) {
     int status;
     DMessage *message;
@@ -41,6 +50,8 @@ void connecter(void * arg) {
             status = robot->start_insecurely(robot);
 			rt_mutex_release(&mutexRobot);
             if (status == STATUS_OK){
+				rt_sem_v(&semWatchdog);
+				rt_sem_v(&semBattery);
                 rt_printf("tconnect : Robot démarrer\n");
             }
         }
@@ -65,7 +76,7 @@ void communiquer(void *arg) {
     /* Connexion */
     rt_printf("tcommunicate : Début de l'exécution du Serveur\n");
     server->open(server, "8000"); //ouvrir la connexion, DServer *serveur;
-    rt_print("tcommunicate : Connexion\n");
+    rt_printf("tcommunicate : Connexion\n");
     
     /* Etat */
     rt_mutex_acquire(&mutexEtat, TM_INFINITE);
@@ -189,6 +200,9 @@ void deplacer(void *arg) {
     }
 }
 
+/* Author : Gautier Delorme
+ * State : done
+ */
 int test_robot_state(RobotStatus res) {
 	int status;
 	rt_mutex_acquire(&mutexEtat, TM_INFINITE);
@@ -204,8 +218,9 @@ int test_robot_state(RobotStatus res) {
 	return status;
 }
 
-/* Author : 
- * State : En cours
+
+/* Author : Gautier Delorme
+ * State : done
  */
 void watchdog(void *arg)
 {
@@ -252,7 +267,7 @@ void batteries(void *arg)
 	int vbat;
 	DBattery* batterie = d_new_battery();
 	DMessage *message;
-	
+	//message de gautier: n'oublis pas d'attendre le semBattery que j'ai créé
 	while(2)
 	{
 		rt_task_wait_period(NULL);
