@@ -20,6 +20,7 @@ extern RT_TASK tbattery;
 extern RT_TASK tcam;
 extern RT_TASK tposition;
 extern RT_TASK tarena;
+extern RT_TASK tmission;
 
 /* @descripteurs des mutex */
 extern RT_MUTEX mutexEtat;
@@ -60,6 +61,7 @@ extern int PRIORITY_TBATTERY;
 extern int PRIORITY_TCAM;
 extern int PRIORITY_TPOSITION;
 extern int PRIORITY_TARENA;
+extern int PRIORITY_TMISSION;
 
 #endif	/* GLOBAL_H */
 

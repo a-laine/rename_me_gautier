@@ -105,6 +105,19 @@ void initStruct(void) {
         rt_printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
+    if (err = rt_task_create(&tmission, NULL, 0, PRIORITY_TMISSION, 0)) {
+        rt_printf("Error task create: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
+    
+    /* Definition des periodes */
+    rt_task_set_periodic(tmove, TM_NOW,200000000); // 200ms
+    rt_task_set_periodic(tsend, TM_NOW,200000000); // 200ms
+    rt_task_set_periodic(twatchdog, TM_NOW,1000000000); // 1s
+    rt_task_set_periodic(tbattery, TM_NOW,250000000); // 250ms
+    rt_task_set_periodic(tcam, TM_NOW,600000000); // 600ms
+    rt_task_set_periodic(tposition, TM_NOW,600000000); // 600ms
+    rt_task_set_periodic(tmission, TM_NOW,600000000); // 600ms
 
     /* Creation des files de messages */
     if (err = rt_queue_create(&queueMsgGUI, "toto", MSG_QUEUE_SIZE*sizeof(DMessage), MSG_QUEUE_SIZE, Q_FIFO)){
@@ -156,12 +169,16 @@ void startTasks() {
         rt_printf("Error task start: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
+    if (err = rt_task_start(&tmission, &mission, NULL)) {
+        rt_printf("Error task start: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
 }
 
 void deleteTasks() {
   rt_task_delete(&tcommunicate);
   rt_task_delete(&tconnect);
-  rt_task_delete(&tmove);    
+  rt_task_delete(&tmove);
   rt_task_delete(&tsend);
   rt_task_delete(&twatchdog);
   rt_task_delete(&tcam);    

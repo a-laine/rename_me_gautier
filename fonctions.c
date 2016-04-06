@@ -204,6 +204,9 @@ int test_robot_state(RobotStatus res) {
 	return status;
 }
 
+/* Author : 
+ * State : En cours
+ */
 void watchdog(void *arg)
 {
 	int status = 1;
@@ -216,7 +219,7 @@ void watchdog(void *arg)
         rt_printf("twatchdog : Attente du sémarphore semWatchdog\n");
         rt_sem_p(&semWatchdog, TM_INFINITE);
         rt_printf("twatchdog : Ouverture de la communication avec le robot\n");
-		sleep(1);
+		rt_task_wait_period(NULL);
 		while (status == 1) {
 			rt_mutex_acquire(&mutexRobot, TM_INFINITE);
             res = robot->reload_wdt(robot);
@@ -266,12 +269,19 @@ void batteries(void *arg)
 		rt_mutex_acquire(&mutexRobot, TM_INFINITE);
         status = robot->get_vbat(robot, &vbat);
 		rt_mutex_release(&mutexRobot);
+		if(status == 1)
+		{
+			// TODO GERER LES ERREURS
+		}
+		
 		batterie->set_level(batterie, vbat);
 		message = d_new_message();
 		message->put_battery_level(message, batterie);
 		
 		rt_printf("tbatteries : Envoi message\n");
-		message->print(message, 100);
+		if (write_in_queue(&queueMsgGUI, message, sizeof (DMessage)) < 0) {
+            message->free(message);
+        }
     }
 }
 

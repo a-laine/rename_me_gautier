@@ -16,6 +16,7 @@ RT_TASK tbattery;
 RT_TASK tcam;
 RT_TASK tposition;
 RT_TASK tarena;
+RT_TASK tmission;
 
 RT_MUTEX mutexEtat;
 RT_MUTEX mutexMove;
@@ -44,3 +45,6 @@ int PRIORITY_TBATTERY = 0;
 int PRIORITY_TCAM = 0;
 int PRIORITY_TPOSITION = 0;
 int PRIORITY_TARENA = 0;
+int PRIORITY_TMISSION = 0;
+
+
