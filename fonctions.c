@@ -10,9 +10,8 @@ void envoyer(void * arg) {
     int err;
 
     while (1) {
-        rt_printf("tenvoyer : Attente du sémarphore semMessage\n");
-		rt_sem_p(&semMessage, TM_INFINITE);
- 		rt_printf("tenvoyer : envoi d'un message\n");
+		rt_task_set_periodic(NULL, TM_NOW, 200e+6);
+ 		rt_printf("tenvoyer : hello\n");
         if ((err = rt_queue_read(&queueMsgGUI, &msg, sizeof (DMessage), TM_INFINITE)) >= 0) {
             rt_printf("tenvoyer : envoi d'un message au moniteur\n");
 			rt_mutex_acquire(&mutexServer, TM_INFINITE);
@@ -51,6 +50,8 @@ void connecter(void * arg) {
             status = robot->start_insecurely(robot);
 			rt_mutex_release(&mutexRobot);
             if (status == STATUS_OK){
+				rt_sem_v(&semWatchdog);
+				rt_sem_v(&semBattery);
                 rt_printf("tconnect : Robot démarrer\n");
             }
         }
@@ -232,7 +233,7 @@ void watchdog(void *arg)
         rt_printf("twatchdog : Attente du sémarphore semWatchdog\n");
         rt_sem_p(&semWatchdog, TM_INFINITE);
         rt_printf("twatchdog : Ouverture de la communication avec le robot\n");
-		sleep(1);
+		rt_task_set_periodic(NULL, TM_NOW, 1000e+6);
 		while (status == 1) {
 			rt_mutex_acquire(&mutexRobot, TM_INFINITE);
             res = robot->reload_wdt(robot);
@@ -265,7 +266,7 @@ void batteries(void *arg)
 	int vbat;
 	DBattery* batterie = d_new_battery();
 	DMessage *message;
-	
+	//message de gautier: n'oublis pas d'attendre le semBattery que j'ai créé
 	while(2)
 	{
 		rt_task_wait_period(NULL);
