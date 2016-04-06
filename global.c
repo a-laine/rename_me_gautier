@@ -26,6 +26,7 @@ RT_SEM semConnecterRobot;
 RT_SEM semWatchdog;
 RT_SEM semAcquArene;
 RT_SEM semValidArene;
+RT_SEM semMessage;
 
 RT_QUEUE queueMsgGUI;
 

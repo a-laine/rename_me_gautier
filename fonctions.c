@@ -10,7 +10,9 @@ void envoyer(void * arg) {
     int err;
 
     while (1) {
-        rt_printf("tenvoyer : Attente d'un message\n");
+        rt_printf("tenvoyer : Attente du sémarphore semMessage\n");
+		rt_sem_p(&semMessage, TM_INFINITE);
+ 		rt_printf("tenvoyer : envoi d'un message\n");
         if ((err = rt_queue_read(&queueMsgGUI, &msg, sizeof (DMessage), TM_INFINITE)) >= 0) {
             rt_printf("tenvoyer : envoi d'un message au moniteur\n");
 			rt_mutex_acquire(&mutexServer, TM_INFINITE);
