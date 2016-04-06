@@ -73,7 +73,7 @@ void communiquer(void *arg) {
     /* Connexion */
     rt_printf("tcommunicate : Début de l'exécution du Serveur\n");
     server->open(server, "8000"); //ouvrir la connexion, DServer *serveur;
-    rt_print("tcommunicate : Connexion\n");
+    rt_printf("tcommunicate : Connexion\n");
     
     /* Etat */
     rt_mutex_acquire(&mutexEtat, TM_INFINITE);
