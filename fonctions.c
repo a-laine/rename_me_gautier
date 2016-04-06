@@ -18,6 +18,9 @@ void envoyer(void * arg) {
     }
 }
 
+/* Author : Gautier Delorme
+ * State : done
+ */
 void connecter(void * arg) {
     int status;
     DMessage *message;
@@ -189,6 +192,9 @@ void deplacer(void *arg) {
     }
 }
 
+/* Author : Gautier Delorme
+ * State : done
+ */
 int test_robot_state(RobotStatus res) {
 	int status;
 	rt_mutex_acquire(&mutexEtat, TM_INFINITE);
@@ -204,6 +210,9 @@ int test_robot_state(RobotStatus res) {
 	return status;
 }
 
+/* Author : Gautier Delorme
+ * State : done
+ */
 void watchdog(void *arg)
 {
 	int status = 1;
