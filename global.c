@@ -32,12 +32,17 @@ RT_SEM semWatchdog;
 RT_SEM semAcquArene;
 RT_SEM semValidArene;
 RT_SEM semBattery;
+RT_SEM semWebcam;
 
 RT_QUEUE queueMsgGUI;
 
 DRobot *robot;
 DMovement *mvt;
 DServer *server;
+DImage* image;
+DArena* arena;
+DPosition* positionRobot;
+DPosition* positionVoulue;
 Etat_communication_t *etat_communication;
 
 int MSG_QUEUE_SIZE = 10;
