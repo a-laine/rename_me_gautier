@@ -319,7 +319,6 @@ void webcam(void *arg)
 	int status;
 	DMessage *message;
 	DCamera* camera = d_new_camera();
-	DImage* image = d_new_image();
 	DJpegimage* jpgImage = d_new_jpegimage();
 	
 	rt_printf("tWebcam : Attente du sémarphore semBattery\n");

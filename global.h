@@ -44,13 +44,13 @@ extern RT_SEM semWebcam;
 extern RT_QUEUE queueMsgGUI;
 
 /* @variables partagées */
-extern int etatCommMoniteur;
-extern int etatCommRobot;
 extern DServer *server;
 extern DRobot *robot;
 extern DMovement *mvt;
 extern DImage* image;
 extern DArena* arene;
+extern DPosition* positionRobot;
+extern DPosition* positionVoulue;
 
 typedef struct Etat_communication_t {
 	int robot;
