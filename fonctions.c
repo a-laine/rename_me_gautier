@@ -68,82 +68,90 @@ void connecter(void * arg) {
     }
 }
 
+/*
+  <author>Nabil</author>
+  <state>quasi-complet, reste à finir la partie mission</state>
+*/
 void communiquer(void *arg) {
-    DMessage *msg = d_new_message();
-    int size = 1;
-    int num_msg = 0;
-
-    /* Connexion */
-    rt_printf("tcommunicate : Début de l'exécution du Serveur\n");
-    server->open(server, "8000"); //ouvrir la connexion, DServer *serveur;
-    rt_printf("tcommunicate : Connexion\n");
+  DMessage *msg = d_new_message();
+  int size = 1;
+  int num_msg = 0;
+  
+  /* Connexion */
+  rt_printf("tcommunicate : Début de l'exécution du Serveur\n");
+  server->open(server, "8000"); //ouvrir la connexion, DServer *serveur;
+  rt_printf("tcommunicate : Connexion\n");
+  
+  /* Etat */
+  rt_mutex_acquire(&mutexEtat, TM_INFINITE);
+  etat_communication = 0;
+  rt_mutex_release(&mutexEtat);
+  
+  while (1) {
+    rt_printf("tcommunicate : Attente d'un message\n");
+    size = server->receive(server, msg);
+    num_msg++;
     
-    /* Etat */
-    rt_mutex_acquire(&mutexEtat, TM_INFINITE);
-    etat_communication = 0;
-    rt_mutex_release(&mutexEtat);
-
-    while (size > 0) {
-      rt_printf("tcommunicate : Attente d'un message\n");
-      size = server->receive(server, msg);
-      num_msg++;
-      
-      if (size > 0) {
-	switch (msg->get_type(msg)) {
+    if (size > 0) {
+      switch (msg->get_type(msg)) {
 	
-	  /* Type::Action */
-	case MESSAGE_TYPE_ACTION:
-	  rt_printf("tcommunicate : Le message %d reçu est une action\n",
-		    num_msg);
-	  DAction *action = d_new_action();
-	  action->from_message(action, msg);
-	  switch (action->get_order(action)) {
-	    /* Type::Action::Connect */
-	  case ACTION_CONNECT_ROBOT:
-	    rt_printf("tcommunicate : Action 'connecter robot'\n");
-	    rt_sem_v(&semConnecterRobot);
-	    break;
-	    /* Type::Action::FindArena */
-	  case ACTION_FIND_ARENA:
-	    rt_printf("tcommunicate : Action 'demander acquisition'\n");
-	    rt_sem_v(&semAcquArene);
-	    break;
-	    /* Type::Action::ArenaFound */
-	  case ACTION_ARENA_IS_FOUND:
-	    rt_printf("tcommunicate : Action 'valider arene'\n");
-	    rt_sem_v(&semValidArene);
-	    rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
-	    areneValidee = 0;
-	    rt_mutex_release(&mutexValidArene);
-	    break;	  
-	  case ACTION_ARENA_FAILED:
-	    rt_printf("tcommunicate : Action 'annuler arene'\n");
-	    rt_sem_v(&semValidArene);
-	    rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
-	    areneValidee = 0;
-	    rt_mutex_release(&mutexValidArene);
-	    break;
-	  }
+	/* Type::Action */
+      case MESSAGE_TYPE_ACTION:
+	rt_printf("tcommunicate : Le message %d reçu est une action\n",
+		  num_msg);
+	DAction *action = d_new_action();
+	action->from_message(action, msg);
+	switch (action->get_order(action)) {
+	  /* Type::Action::Connect */
+	case ACTION_CONNECT_ROBOT:
+	  rt_printf("tcommunicate : Action 'connecter robot'\n");
+	  rt_sem_v(&semConnecterRobot);
 	  break;
-	  
-	  /* Type::Mouvement */
-	case MESSAGE_TYPE_MOVEMENT:
-	  rt_printf("tcommunicate : Le message reçu %d est un mouvement\n",
-		    num_msg);
-	  rt_mutex_acquire(&mutexMove, TM_INFINITE);
-	  mvt->from_message(mvt, msg);
-	  mvt->print(mvt);
-	  rt_mutex_release(&mutexMove);
+	  /* Type::Action::FindArena */
+	case ACTION_FIND_ARENA:
+	  rt_printf("tcommunicate : Action 'demander acquisition'\n");
+	  rt_sem_v(&semAcquArene);
 	  break;
-      
-    /* Message Mouvement */
-
-    /* Message ordre */
+	  /* Type::Action::ArenaFound */
+	case ACTION_ARENA_IS_FOUND:
+	  rt_printf("tcommunicate : Action 'valider arene'\n");
+	  rt_sem_v(&semValidArene);
+	  rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
+	  areneValidee = 0;
+	  rt_mutex_release(&mutexValidArene);
+	  break;	  
+	case ACTION_ARENA_FAILED:
+	  rt_printf("tcommunicate : Action 'annuler arene'\n");
+	  rt_sem_v(&semValidArene);
+	  rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
+	  areneValidee = 1;
+	  rt_mutex_release(&mutexValidArene);
+	  break;
 	}
+	break;
+	
+	/* Type::Mission */
+      case MESSAGE_TYPE_MISSION:
+	rt_printf("tcommunicate : Le message reçu %d est une mission\n",
+		  num_msg);
+	// A Compléter avec les missions
+	rt_sem_v(&semStartMission);
+	break;
+	
+	/* Type::Mouvement */
+      case MESSAGE_TYPE_MOVEMENT:
+	rt_printf("tcommunicate : Le message reçu %d est un mouvement\n",
+		  num_msg);
+	rt_mutex_acquire(&mutexMove, TM_INFINITE);
+	mvt->from_message(mvt, msg);
+	mvt->print(mvt);
+	rt_mutex_release(&mutexMove);
+	break;
       }
     }
-    
+  }
 }
+    
 
 void deplacer(void *arg) {
     int status = 1;
@@ -275,7 +283,8 @@ void batteries(void *arg)
 	int vbat;
 	DBattery* batterie = d_new_battery();
 	DMessage *message;
-	//message de gautier: n'oublis pas d'attendre le semBattery que j'ai créé
+	//message de gautier: n'oublie pas d'attendre le semBattery que j'ai créé
+	//message de nabil: hey salut gautier, ça va?
 	while(2)
 	{
 		rt_task_wait_period(NULL);
@@ -310,7 +319,15 @@ void batteries(void *arg)
 
 void arene(void *arg)
 {
-	
+  rt_mutex_acquire(&mutexArene, TM_INFINITE);
+  arene = d_new_arena();
+  rt_mutex_release(&mutexArene);
+  
+  do {
+    
+    d_arena_get_x;
+    d_arena_get_y;
+  }
 }
 
 void webcam(void *arg)
