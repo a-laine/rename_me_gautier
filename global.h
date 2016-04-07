@@ -48,7 +48,7 @@ extern DServer *server;
 extern DRobot *robot;
 extern DMovement *mvt;
 extern DImage* image;
-extern DArena* arene;
+extern DArena* arena;
 extern DPosition* positionRobot;
 extern DPosition* positionVoulue;
 

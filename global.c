@@ -40,7 +40,7 @@ DRobot *robot;
 DMovement *mvt;
 DServer *server;
 DImage* image;
-DArena* arene;
+DArena* arena;
 DPosition* positionRobot;
 DPosition* positionVoulue;
 Etat_communication_t *etat_communication;

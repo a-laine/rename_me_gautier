@@ -114,14 +114,14 @@ void communiquer(void *arg) {
 	    rt_printf("tcommunicate : Action 'valider arene'\n");
 	    rt_sem_v(&semValidArene);
 	    rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
-	    areneValidee = 0;
+	    //areneValidee = 0;
 	    rt_mutex_release(&mutexValidArene);
 	    break;	  
 	  case ACTION_ARENA_FAILED:
 	    rt_printf("tcommunicate : Action 'annuler arene'\n");
 	    rt_sem_v(&semValidArene);
 	    rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
-	    areneValidee = 0;
+	    //areneValidee = 0;
 	    rt_mutex_release(&mutexValidArene);
 	    break;
 	  }
@@ -335,7 +335,7 @@ void webcam(void *arg)
     	camera->get_frame(webcam, image);
     	
 		rt_mutex_acquire(&mutexArene, TM_INFINITE);
-		d_imageshop_draw_arena(image, arene);
+		d_imageshop_draw_arena(image, arena);
 		rt_mutex_release(&mutexArene);
 		
 		rt_mutex_acquire(&mutexPosition, TM_INFINITE);
