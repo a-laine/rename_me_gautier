@@ -34,7 +34,7 @@ void connecter(void * arg) {
     rt_printf("tconnect : Debut de l'exécution de tconnect\n");
 
     while (1) {
-        rt_printf("tconnect : Attente du sémarphore semConnecterRobot\n");
+        rt_printf("tconnect : Attente du sémaphore semConnecterRobot\n");
         rt_sem_p(&semConnecterRobot, TM_INFINITE);
         rt_printf("tconnect : Ouverture de la communication avec le robot\n");
 		rt_mutex_acquire(&mutexRobot, TM_INFINITE);
@@ -109,9 +109,10 @@ void communiquer(void *arg) {
 	    rt_sem_v(&semAcquArene);
 	    break;
 	    /* Type::Action::ArenaFound */
+	  case ACTION_ARENA_FOUND:
 	    rt_printf("tcommunicate : Action 'valider arene'\n");
 	    rt_sem_v(&semValidArene);
-	    rt_mutex_acquire(&mutexEtat, TM_INFINITE);
+	    rt_mutex_acquire(&mutex, TM_INFINITE);
 	    //areneValidee = 0;
 	    rt_mutex_release(&mutexEtat);
 	    break;

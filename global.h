@@ -27,8 +27,12 @@ extern RT_MUTEX mutexEtat;
 extern RT_MUTEX mutexMove;
 extern RT_MUTEX mutexRobot;
 extern RT_MUTEX mutexServer;
+extern RT_MUTEX mutexArene;
+extern RT_MUTEX mutexImage;
+extern RT_MUTEX mutexPosition;
+extern RT_MUTEX mutexValidArene;
 
-/* @descripteurs des sempahore */
+/* @descripteurs des sempahores */
 extern RT_SEM semConnecterRobot;
 extern RT_SEM semWatchdog;
 extern RT_SEM semAcquArene;
