@@ -10,7 +10,7 @@ void envoyer(void * arg) {
     int err;
 
     while (1) {
-		rt_task_set_periodic(NULL, TM_NOW, 200e+6);
+		rt_task_wait_period(NULL);
  		rt_printf("tenvoyer : hello\n");
         if ((err = rt_queue_read(&queueMsgGUI, &msg, sizeof (DMessage), TM_INFINITE)) >= 0) {
             rt_printf("tenvoyer : envoi d'un message au moniteur\n");
@@ -52,6 +52,7 @@ void connecter(void * arg) {
             if (status == STATUS_OK){
 				rt_sem_v(&semWatchdog);
 				rt_sem_v(&semBattery);
+				rt_sem_v(&semWebcam);
                 rt_printf("tconnect : Robot démarrer\n");
             }
         }
@@ -152,7 +153,7 @@ void deplacer(void *arg) {
     DMessage *message;
 
     rt_printf("tmove : Debut de l'éxecution de periodique à 1s\n");
-    rt_task_set_periodic(NULL, TM_NOW, 1000000000);
+    rt_task_wait_period(NULL);
 
     while (1) {
         /* Attente de l'activation périodique */
@@ -267,7 +268,7 @@ void position(void *arg)
 }
 
 /* Author : Aurélien Lainé
- * State : En cours
+ * State : done
  */
 void batteries(void *arg)
 {
@@ -275,27 +276,24 @@ void batteries(void *arg)
 	int vbat;
 	DBattery* batterie = d_new_battery();
 	DMessage *message;
-	//message de gautier: n'oublis pas d'attendre le semBattery que j'ai créé
+	
+	rt_printf("tbattery : Attente du sémarphore semBattery\n");
+    rt_sem_p(&semBattery, TM_INFINITE);
 	while(2)
 	{
 		rt_task_wait_period(NULL);
 		
-		// verifier la communication
-		rt_mutex_acquire(&mutexEtat, TM_INFINITE);
-		status = etat_communication->robot;
-		rt_mutex_release(&mutexEtat);
-		if(status == 1)
-		{
-			// TODO GERER LES ERREURS
-		}
+		do {
+			rt_mutex_acquire(&mutexEtat, TM_INFINITE);
+			status = etat_communication->robot;
+			rt_mutex_release(&mutexEtat);
+		} while(status == 1);
 		
-		rt_mutex_acquire(&mutexRobot, TM_INFINITE);
-        status = robot->get_vbat(robot, &vbat);
-		rt_mutex_release(&mutexRobot);
-		if(status == 1)
-		{
-			// TODO GERER LES ERREURS
-		}
+		do {
+			rt_mutex_acquire(&mutexRobot, TM_INFINITE);
+		    status = robot->get_vbat(robot, &vbat);
+			rt_mutex_release(&mutexRobot);
+		} while(status == 1);
 		
 		batterie->set_level(batterie, vbat);
 		message = d_new_message();
@@ -313,9 +311,55 @@ void arene(void *arg)
 	
 }
 
+/* Author : Aurélien Lainé
+ * State : done
+ */
 void webcam(void *arg)
 {
+	int status;
+	DMessage *message;
+	DCamera* camera = d_new_camera();
+	DImage* image = d_new_image();
+	DJpegimage* jpgImage = d_new_jpegimage();
 	
+	rt_printf("tWebcam : Attente du sémarphore semBattery\n");
+    rt_sem_p(&semBattery, TM_INFINITE);
+    
+    camera->open(camera);
+    
+    while(1)
+    {
+    	rt_task_wait_period(NULL);
+    	
+    	rt_mutex_acquire(&mutexImage, TM_INFINITE);
+    	
+    	camera->get_frame(webcam, image);
+    	
+		rt_mutex_acquire(&mutexArene, TM_INFINITE);
+		d_imageshop_draw_arena(image, arene);
+		rt_mutex_release(&mutexArene);
+		
+		rt_mutex_acquire(&mutexPosition, TM_INFINITE);
+    	d_imageshop_draw_position(image, positionRobot);
+    	rt_mutex_release(&mutexPosition);
+    	
+    	do {
+			rt_mutex_acquire(&mutexEtat, TM_INFINITE);
+			status = etat_communication->robot;
+			rt_mutex_release(&mutexEtat);
+		} while(status == 1);
+		
+		jpgImage->compress(jpgImage, image);
+		rt_mutex_release(&mutexImage);
+		
+		message = d_new_message();
+		message->put_jpeg_image(message, jpgImage);
+		
+		rt_printf("twebcam : Envoi message\n");
+		if (write_in_queue(&queueMsgGUI, message, sizeof (DMessage)) < 0) {
+            message->free(message);
+        }
+    }
 }
 
 void mission(void *arg)

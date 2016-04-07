@@ -32,6 +32,7 @@ RT_SEM semWatchdog;
 RT_SEM semAcquArene;
 RT_SEM semValidArene;
 RT_SEM semBattery;
+RT_SEM semWebcam;
 
 RT_QUEUE queueMsgGUI;
 

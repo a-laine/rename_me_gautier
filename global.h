@@ -38,6 +38,7 @@ extern RT_SEM semWatchdog;
 extern RT_SEM semAcquArene;
 extern RT_SEM semValidArene;
 extern RT_SEM semBattery;
+extern RT_SEM semWebcam;
 
 /* @descripteurs des files de messages */
 extern RT_QUEUE queueMsgGUI;
@@ -48,6 +49,8 @@ extern int etatCommRobot;
 extern DServer *server;
 extern DRobot *robot;
 extern DMovement *mvt;
+extern DImage* image;
+extern DArena* arene;
 
 typedef struct Etat_communication_t {
 	int robot;
