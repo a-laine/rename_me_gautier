@@ -109,12 +109,19 @@ void communiquer(void *arg) {
 	    rt_sem_v(&semAcquArene);
 	    break;
 	    /* Type::Action::ArenaFound */
-	  case ACTION_ARENA_FOUND:
+	  case ACTION_ARENA_IS_FOUND:
 	    rt_printf("tcommunicate : Action 'valider arene'\n");
 	    rt_sem_v(&semValidArene);
-	    rt_mutex_acquire(&mutex, TM_INFINITE);
-	    //areneValidee = 0;
-	    rt_mutex_release(&mutexEtat);
+	    rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
+	    areneValidee = 0;
+	    rt_mutex_release(&mutexValidArene);
+	    break;	  
+	  case ACTION_ARENA_FAILED:
+	    rt_printf("tcommunicate : Action 'annuler arene'\n");
+	    rt_sem_v(&semValidArene);
+	    rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
+	    areneValidee = 0;
+	    rt_mutex_release(&mutexValidArene);
 	    break;
 	  }
 	  break;
