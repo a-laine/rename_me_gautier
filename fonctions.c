@@ -69,117 +69,94 @@ void connecter(void * arg) {
     }
 }
 
-/*
-  <author>Nabil</author>
-  <state>quasi-complet, reste à finir la partie mission</state>
-*/
+/* Author : Nabil
+ * State : quasi-complet, reste à finir la partie mission
+ */
 void communiquer(void *arg) {
-  DMessage *msg = d_new_message();
-  int size = 1;
-  int num_msg = 0;
-  
-  /* Connexion */
-  rt_printf("tcommunicate : Début de l'exécution du Serveur\n");
-  server->open(server, "8000"); //ouvrir la connexion, DServer *serveur;
-  rt_printf("tcommunicate : Connexion\n");
-  
-  /* Etat */
-  rt_mutex_acquire(&mutexEtat, TM_INFINITE);
-  etat_communication = 0;
-  rt_mutex_release(&mutexEtat);
-  
-  while (1) {
-    rt_printf("tcommunicate : Attente d'un message\n");
-    size = server->receive(server, msg);
-    num_msg++;
-    
-    if (size > 0) {
-      switch (msg->get_type(msg)) {
-	
-	  /* Type::Action */
-	case MESSAGE_TYPE_ACTION:
-	  rt_printf("tcommunicate : Le message %d reçu est une action\n",
-		    num_msg);
-	  DAction *action = d_new_action();
-	  action->from_message(action, msg);
-	  switch (action->get_order(action)) {
-	    /* Type::Action::Connect */
-	  case ACTION_CONNECT_ROBOT:
-	    rt_printf("tcommunicate : Action 'connecter robot'\n");
-	    rt_sem_v(&semConnecterRobot);
-	    break;
-	    /* Type::Action::FindArena */
-	  case ACTION_FIND_ARENA:
-	    rt_printf("tcommunicate : Action 'demander acquisition'\n");
-	    rt_sem_v(&semAcquArene);
-	    break;
-	    /* Type::Action::ArenaFound */
-	  case ACTION_ARENA_IS_FOUND:
-	    rt_printf("tcommunicate : Action 'valider arene'\n");
-	    rt_sem_v(&semValidArene);
-	    rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
-	    //areneValidee = 0;
-	    rt_mutex_release(&mutexValidArene);
-	    break;	  
-	  case ACTION_ARENA_FAILED:
-	    rt_printf("tcommunicate : Action 'annuler arene'\n");
-	    rt_sem_v(&semValidArene);
-	    rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
-	    //areneValidee = 0;
-	    rt_mutex_release(&mutexValidArene);
-	    break;
-	  }
-	  break;
-	  
-	  /* Type::Action::FindArena */
-	case ACTION_FIND_ARENA:
-	  rt_printf("tcommunicate : Action 'demander acquisition'\n");
-	  rt_sem_v(&semAcquArene);
-	  break;
+	DMessage *msg = d_new_message();
+	int size = 1;
+	int num_msg = 0;
 
-	  /* Type::Action::ArenaFound */
-	case ACTION_ARENA_IS_FOUND:
-	  rt_printf("tcommunicate : Action 'valider arene'\n");
-	  rt_sem_v(&semValidArene);
-	  rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
-	  areneValidee = 0;
-	  rt_mutex_release(&mutexValidArene);
-	  break;
-	  /* Type::Action::ArenaFailed */
-	case ACTION_ARENA_FAILED:
-	  rt_printf("tcommunicate : Action 'annuler arene'\n");
-	  rt_sem_v(&semValidArene);
-	  rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
-	  areneValidee = 1;
-	  rt_mutex_release(&mutexValidArene);
-	  break;
+	/* Connexion */
+	rt_printf("tcommunicate : Début de l'exécution du Serveur\n");
+	server->open(server, "8000"); //ouvrir la connexion, DServer *serveur;
+	rt_printf("tcommunicate : Connexion\n");
+
+	/* Etat */
+	rt_mutex_acquire(&mutexEtat, TM_INFINITE);
+	etat_communication = 0;
+	rt_mutex_release(&mutexEtat);
+
+	while (1) {
+		rt_printf("tcommunicate : Attente d'un message\n");
+		size = server->receive(server, msg);
+		num_msg++;
+
+		if (size <= 0)
+			continue;
+	
+		switch (msg->get_type(msg)) {
+
+			/* Type::Action */
+			case MESSAGE_TYPE_ACTION:
+				rt_printf("tcommunicate : Le message %d reçu est une action\n", num_msg);
+				DAction *action = d_new_action();
+				action->from_message(action, msg);
+				switch (action->get_order(action)) {
+					/* Type::Action::Connect */
+					case ACTION_CONNECT_ROBOT:
+						rt_printf("tcommunicate : Action 'connecter robot'\n");
+						rt_sem_v(&semConnecterRobot);
+						break;
+					/* Type::Action::FindArena */
+					case ACTION_FIND_ARENA:
+						rt_printf("tcommunicate : Action 'demander acquisition'\n");
+						rt_sem_v(&semAcquArene);
+						break;
+					/* Type::Action::ArenaFound */
+					case ACTION_ARENA_IS_FOUND:
+						rt_printf("tcommunicate : Action 'valider arene'\n");
+						rt_sem_v(&semValidArene);
+						rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
+						areneValidee = 0;
+						rt_mutex_release(&mutexValidArene);
+						break;
+					/* Type::Action::ArenaFailed */
+					case ACTION_ARENA_FAILED:
+						rt_printf("tcommunicate : Action 'annuler arene'\n");
+						rt_sem_v(&semValidArene);
+						rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
+						areneValidee = 1;
+						rt_mutex_release(&mutexValidArene);
+						break;
+				}
+				break;
+
+			/* Type::Mission */
+			case MESSAGE_TYPE_MISSION:
+				rt_printf("tcommunicate : Le message reçu %d est une mission\n", num_msg);
+				rt_mutex_acquire(&mutexMove, TM_INFINITE);
+				// A Compléter avec les missions
+				rt_mutex_release(&mutexMove);
+				rt_sem_v(&semMission);
+				break;
+
+			/* Type::Mouvement */
+			case MESSAGE_TYPE_MOVEMENT:
+				rt_printf("tcommunicate : Le message reçu %d est un mouvement\n", num_msg);
+				rt_mutex_acquire(&mutexMove, TM_INFINITE);
+				mvt->from_message(mvt, msg);
+				mvt->print(mvt);
+				rt_mutex_release(&mutexMove);
+				break;
+		}
 	}
-	break;
-	
-	/* Type::Mission */
-      case MESSAGE_TYPE_MISSION:
-	rt_printf("tcommunicate : Le message reçu %d est une mission\n",
-		  num_msg);
-	// A Compléter avec les missions
-	rt_sem_v(&semStartMission);
-	break;
-	
-	/* Type::Mouvement */
-      case MESSAGE_TYPE_MOVEMENT:
-	rt_printf("tcommunicate : Le message reçu %d est un mouvement\n",
-		  num_msg);
-	rt_mutex_acquire(&mutexMove, TM_INFINITE);
-	mvt->from_message(mvt, msg);
-	mvt->print(mvt);
-	rt_mutex_release(&mutexMove);
-	break;
-      }
-    }
-  //commentaire
-  }
+	//commentaire
 }
     
-
+/* Author : 
+ * State : 
+ */
 void deplacer(void *arg) {
     int status = 1;
     int gauche;
@@ -296,9 +273,37 @@ void watchdog(void *arg)
     }
 }
 
+/* Author : Aurélien Lainé
+ * State : in progress
+ */
 void position(void *arg)
 {
-	
+	int status;
+	DMessage *message;
+	rt_printf("tposition : Attente du sémarphore semPosition\n");
+    rt_sem_p(&semPosition, TM_INFINITE);
+    
+    while(1)
+    {
+    	rt_task_wait_period(NULL);
+		do {
+			rt_mutex_acquire(&mutexEtat, TM_INFINITE);
+			status = etat_communication->robot;
+			rt_mutex_release(&mutexEtat);
+		} while(status == 1);
+		
+		rt_mutex_acquire(&mutexPositionRobot, TM_INFINITE);
+		// TODO
+		
+		message = d_new_message();
+		message->put_position(message, positionRobot);
+		rt_mutex_release(&mutexPositionRobot);
+		
+		rt_printf("tbatteries : Envoi message\n");
+		if (write_in_queue(&queueMsgGUI, message, sizeof (DMessage)) < 0) {
+            message->free(message);
+        }
+	}
 }
 
 /* Author : Aurélien Lainé
@@ -323,11 +328,9 @@ void batteries(void *arg)
 			rt_mutex_release(&mutexEtat);
 		} while(status == 1);
 		
-		do {
-			rt_mutex_acquire(&mutexRobot, TM_INFINITE);
-		    status = robot->get_vbat(robot, &vbat);
-			rt_mutex_release(&mutexRobot);
-		} while(status == 1);
+		rt_mutex_acquire(&mutexRobot, TM_INFINITE);
+	    status = robot->get_vbat(robot, &vbat);
+		rt_mutex_release(&mutexRobot);
 		
 		batterie->set_level(batterie, vbat);
 		message = d_new_message();
@@ -340,28 +343,41 @@ void batteries(void *arg)
     }
 }
 
-/* 
-   <author>Nabil</author>
-   <state>en cours</state>
-*/
+/* Author : Nabil Sellam / Aurélien Lainé
+ * State : in progress
+ */
+// Cet algorithme est completement faux!!!!!!!!
 void arene(void *arg)
 {
-  
-  rt_mutex_acquire(&mutexArene, TM_INFINITE);
-  arena = d_new_arena();
-  rt_mutex_release(&mutexArene);
-  
-  do {
-    //image?
-    rt_mutex_acquire(&mutexArene, TM_INFINITE);
-    arena = d_arena_set(arena, d_arena_get_x(arena), d_arena_get_y(arena), d_arena_get_height(arena), d_arena_get_width(arena), d_arena_get_angle(arena));
-    rt_mutex_release(&mutexArene);
+	while(1)
+	{
+		rt_printf("tArene : Attente du sémarphore semAcquArene\n");
+		rt_sem_p(&semAcquArene, TM_INFINITE);
 
-    //à faire : validation arène
-    rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
-    //arène validée?
-    rt_mutex_release(&mutexValidArene);
-  } while (areneValidee);
+		do {
+			// TODO image? / calcul de l'arene?
+			rt_mutex_acquire(&mutexArene, TM_INFINITE);
+			float x = arena->get_x(arena);
+			float y = arena->get_y(arena);
+			float height = arena->get_height(arena);
+			float width = arena->get_width(arena);
+			float angle = arena->get_angle(arena);
+			arena->set(arena, x, y, height, width, angle);
+			rt_mutex_release(&mutexArene);
+			
+			// Demander la validation de l'arene
+			
+			rt_printf("tArene : Attente du sémarphore semValidArene\n");
+			rt_sem_p(&semValidArene, TM_INFINITE);
+			
+			rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
+			if(areneValidee == 0)
+			{
+				// TODO Dessiner l'arene
+			}
+			rt_mutex_release(&mutexValidArene);
+		} while(areneValidee == 0);
+	}
 }
 
 /* Author : Aurélien Lainé
@@ -387,13 +403,14 @@ void webcam(void *arg)
     	
     	camera->get_frame(webcam, image);
     	
+    	// Un petit if ?
 		rt_mutex_acquire(&mutexArene, TM_INFINITE);
 		d_imageshop_draw_arena(image, arena);
 		rt_mutex_release(&mutexArene);
 		
-		rt_mutex_acquire(&mutexPosition, TM_INFINITE);
+		rt_mutex_acquire(&mutexPositionRobot, TM_INFINITE);
     	d_imageshop_draw_position(image, positionRobot);
-    	rt_mutex_release(&mutexPosition);
+    	rt_mutex_release(&mutexPositionRobot);
     	
     	do {
 			rt_mutex_acquire(&mutexEtat, TM_INFINITE);
@@ -414,9 +431,27 @@ void webcam(void *arg)
     }
 }
 
+/* Author : Aurélien Lainé
+ * State : started
+ */
 void mission(void *arg)
 {
-	
+	while(1)
+	{
+		rt_printf("tMission : Attente du sémarphore semMission\n");
+		rt_sem_p(&semMission, TM_INFINITE);
+		
+		while(0) // while( pas arrivé )
+		{
+			// se deplacer à la position voulue
+			rt_mutex_acquire(&mutexMove, TM_INFINITE);
+			//positionVoulue
+			rt_mutex_release(&mutexMove);
+			rt_mutex_acquire(&mutexMove, TM_INFINITE);
+			//mvt->set(mvt, );
+			rt_mutex_release(&mutexMove);
+		}
+    }
 }
 
 int write_in_queue(RT_QUEUE *msgQueue, void * data, int size) {

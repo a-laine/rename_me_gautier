@@ -77,7 +77,11 @@ void initStruct(void) {
         rt_printf("Error mutex create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if (err = rt_mutex_create(&mutexPosition, NULL)) {
+    if (err = rt_mutex_create(&mutexPositionRobot, NULL)) {
+        rt_printf("Error mutex create: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
+    if (err = rt_mutex_create(&mutexPositionVoulue, NULL)) {
         rt_printf("Error mutex create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
@@ -95,6 +99,10 @@ void initStruct(void) {
         rt_printf("Error semaphore create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
+    if (err = rt_sem_create(&semPosition, NULL, 0, S_FIFO)) {
+        rt_printf("Error semaphore create: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
     if (err = rt_sem_create(&semAcquArene, NULL, 0, S_FIFO)) {
         rt_printf("Error semaphore create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
@@ -108,6 +116,10 @@ void initStruct(void) {
         exit(EXIT_FAILURE);
     }
     if (err = rt_sem_create(&semWebcam, NULL, 0, S_FIFO)) {
+        rt_printf("Error semaphore create: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
+    if (err = rt_sem_create(&semMission, NULL, 0, S_FIFO)) {
         rt_printf("Error semaphore create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
@@ -164,12 +176,14 @@ void initStruct(void) {
     rt_task_set_periodic(&tmission, TM_NOW, 600000000); // 600ms
 
     /* Creation des files de messages */
-    if (err = rt_queue_create(&queueMsgGUI, "toto", MSG_QUEUE_SIZE*sizeof(DMessage), MSG_QUEUE_SIZE, Q_FIFO)){
+    if (err = rt_queue_create(&queueMsgGUI, "toto", MSG_QUEUE_SIZE*sizeof(DMessage), MSG_QUEUE_SIZE, Q_FIFO))
+    {
         rt_printf("Error msg queue create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
 
     /* Creation des structures globales du projet */
+    areneValidee = 0;
     robot = d_new_robot();
     mvt = d_new_movement();
     server = d_new_server();

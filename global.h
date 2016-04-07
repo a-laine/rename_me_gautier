@@ -29,21 +29,25 @@ extern RT_MUTEX mutexRobot;
 extern RT_MUTEX mutexServer;
 extern RT_MUTEX mutexArene;
 extern RT_MUTEX mutexImage;
-extern RT_MUTEX mutexPosition;
+extern RT_MUTEX mutexPositionRobot;
+extern RT_MUTEX mutexPositionVoulue;
 extern RT_MUTEX mutexValidArene;
 
 /* @descripteurs des sempahores */
 extern RT_SEM semConnecterRobot;
 extern RT_SEM semWatchdog;
+extern RT_SEM semPosition;
 extern RT_SEM semAcquArene;
 extern RT_SEM semValidArene;
 extern RT_SEM semBattery;
 extern RT_SEM semWebcam;
+extern RT_SEM semMission;
 
 /* @descripteurs des files de messages */
 extern RT_QUEUE queueMsgGUI;
 
 /* @variables partagées */
+extern int areneValidee;
 extern DServer *server;
 extern DRobot *robot;
 extern DMovement *mvt;

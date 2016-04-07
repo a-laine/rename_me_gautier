@@ -24,18 +24,22 @@ RT_MUTEX mutexRobot;
 RT_MUTEX mutexServer;
 RT_MUTEX mutexArene;
 RT_MUTEX mutexImage;
-RT_MUTEX mutexPosition;
+RT_MUTEX mutexPositionRobot;
+RT_MUTEX mutexPositionVoulue;
 RT_MUTEX mutexValidArene;
 
 RT_SEM semConnecterRobot;
 RT_SEM semWatchdog;
+RT_SEM semPosition;
 RT_SEM semAcquArene;
 RT_SEM semValidArene;
 RT_SEM semBattery;
 RT_SEM semWebcam;
+RT_SEM semMission;
 
 RT_QUEUE queueMsgGUI;
 
+int areneValidee;
 DRobot *robot;
 DMovement *mvt;
 DServer *server;
