@@ -183,12 +183,12 @@ void initStruct(void) {
     }
 
     /* Creation des structures globales du projet */
-    areneValidee = 0;
+    areneValidee = 1;
+	arena = 0;
     robot = d_new_robot();
     mvt = d_new_movement();
     server = d_new_server();
     image = d_new_image();
-	arena = d_new_arena();
 	positionRobot = d_new_position();
 	positionVoulue = d_new_position();
 	etat_communication = malloc(sizeof(Etat_communication_t));
