@@ -135,9 +135,9 @@ void communiquer(void *arg) {
 			/* Type::Mission */
 			case MESSAGE_TYPE_MISSION:
 				rt_printf("tcommunicate : Le message reçu %d est une mission\n", num_msg);
-				rt_mutex_acquire(&mutexMove, TM_INFINITE);
+				rt_mutex_acquire(&mutexPositionVoulue, TM_INFINITE);
 				// A Compléter avec les missions
-				rt_mutex_release(&mutexMove);
+				rt_mutex_release(&mutexPositionVoulue);
 				rt_sem_v(&semMission);
 				break;
 
@@ -151,11 +151,10 @@ void communiquer(void *arg) {
 				break;
 		}
 	}
-	//commentaire
 }
     
 /* Author : 
- * State : 
+ * State : done
  */
 void deplacer(void *arg) {
     int status = 1;
