@@ -434,6 +434,7 @@ void webcam(void *arg)
 			rt_mutex_release(&mutexArene);
 		}
 		
+		// dessiner la position du robot
 		rt_mutex_acquire(&mutexPositionRobot, TM_INFINITE);
     	d_imageshop_draw_position(image, positionRobot);
     	rt_mutex_release(&mutexPositionRobot);
