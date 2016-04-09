@@ -116,18 +116,18 @@ void communiquer(void *arg) {
 					/* Type::Action::ArenaFound */
 					case ACTION_ARENA_IS_FOUND:
 						rt_printf("tcommunicate : Action 'valider arene'\n");
-						rt_sem_v(&semValidArene);
 						rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
-						areneValidee = 0;
+						areneValidee = 1;
 						rt_mutex_release(&mutexValidArene);
+						rt_sem_v(&semValidArene);
 						break;
 					/* Type::Action::ArenaFailed */
 					case ACTION_ARENA_FAILED:
 						rt_printf("tcommunicate : Action 'annuler arene'\n");
-						rt_sem_v(&semValidArene);
 						rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
-						areneValidee = 1;
+						areneValidee = 0;
 						rt_mutex_release(&mutexValidArene);
+						rt_sem_v(&semValidArene);
 						break;
 				}
 				break;
@@ -272,12 +272,16 @@ void watchdog(void *arg)
     }
 }
 
+
+
 /* Author : Aurélien Lainé
- * State : in progress
+ * State : done
  */
 void position(void *arg)
 {
 	int status;
+	int tmpAreneValidee;
+	DPosition* tmpPositionRobot;
 	DMessage *message;
 	rt_printf("tposition : Attente du sémarphore semPosition\n");
     rt_sem_p(&semPosition, TM_INFINITE);
@@ -291,17 +295,42 @@ void position(void *arg)
 			rt_mutex_release(&mutexEtat);
 		} while(status == 1);
 		
-		rt_mutex_acquire(&mutexPositionRobot, TM_INFINITE);
-		// TODO
 		
+		rt_mutex_acquire(&mutexImage, TM_INFINITE);
+		rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
+		tmpAreneValidee = areneValidee;
+		rt_mutex_release(&mutexValidArene);
+		if(tmpAreneValidee == 1)
+		{
+			rt_mutex_acquire(&mutexArene, TM_INFINITE);
+			tmpPositionRobot = image->compute_robot_position(image,arena);
+			if(tmpPositionRobot == 0) // a verifier
+			{
+				//erreur
+			}
+			rt_mutex_release(&mutexArene);
+		}
+		else
+		{
+			tmpPositionRobot = image->compute_robot_position(image,0);
+			if(tmpPositionRobot == 0) // a verifier
+			{
+				//erreur
+			}
+		}
+		rt_mutex_release(&mutexImage);
+		
+		rt_mutex_acquire(&mutexPositionRobot, TM_INFINITE);
+		d_position_free(positionRobot);
+		positionRobot = tmpPositionRobot;
 		message = d_new_message();
 		message->put_position(message, positionRobot);
 		rt_mutex_release(&mutexPositionRobot);
 		
 		rt_printf("tbatteries : Envoi message\n");
 		if (write_in_queue(&queueMsgGUI, message, sizeof (DMessage)) < 0) {
-            message->free(message);
-        }
+			message->free(message);
+		}
 	}
 }
 
@@ -343,39 +372,31 @@ void batteries(void *arg)
 }
 
 /* Author : Nabil Sellam / Aurélien Lainé
- * State : in progress
+ * State : done
  */
-// Cet algorithme est completement faux!!!!!!!!
 void arene(void *arg)
 {
+	int tmpAreneValidee;
 	while(1)
 	{
 		rt_printf("tArene : Attente du sémarphore semAcquArene\n");
 		rt_sem_p(&semAcquArene, TM_INFINITE);
-
-		do {
-			// TODO image? / calcul de l'arene?
-			rt_mutex_acquire(&mutexArene, TM_INFINITE);
-			float x = arena->get_x(arena);
-			float y = arena->get_y(arena);
-			float height = arena->get_height(arena);
-			float width = arena->get_width(arena);
-			float angle = arena->get_angle(arena);
-			arena->set(arena, x, y, height, width, angle);
-			rt_mutex_release(&mutexArene);
-			
-			// Demander la validation de l'arene
-			
-			rt_printf("tArene : Attente du sémarphore semValidArene\n");
-			rt_sem_p(&semValidArene, TM_INFINITE);
-			
-			rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
-			if(areneValidee == 0)
-			{
-				// TODO Dessiner l'arene
-			}
-			rt_mutex_release(&mutexValidArene);
-		} while(areneValidee == 0);
+		
+		rt_mutex_acquire(&mutexImage, TM_INFINITE);
+		
+		// Compute la nouvelle arene
+		rt_mutex_acquire(&mutexArene, TM_INFINITE);
+		arena = image->compute_arena_position(image);
+		rt_mutex_release(&mutexArene);
+		rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
+		areneValidee == 1; // twebcam affiche la nouvelle arene
+		rt_mutex_release(&mutexValidArene);
+		
+		rt_mutex_release(&mutexImage);
+		
+		// Demander la validation de l'arene
+		rt_printf("tArene : Attente du sémarphore semValidArene\n");
+		rt_sem_p(&semValidArene, TM_INFINITE);
 	}
 }
 
@@ -384,7 +405,7 @@ void arene(void *arg)
  */
 void webcam(void *arg)
 {
-	int status;
+	int status, tmpAreneValidee;
 	DMessage *message;
 	DCamera* camera = d_new_camera();
 	DJpegimage* jpgImage = d_new_jpegimage();
@@ -402,10 +423,16 @@ void webcam(void *arg)
     	
     	camera->get_frame(webcam, image);
     	
-    	// Un petit if ?
-		rt_mutex_acquire(&mutexArene, TM_INFINITE);
-		d_imageshop_draw_arena(image, arena);
-		rt_mutex_release(&mutexArene);
+		// dessiner l'arene
+		rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
+		tmpAreneValidee = areneValidee;
+		rt_mutex_release(&mutexValidArene);
+		if(tmpAreneValidee == 1)
+		{
+			rt_mutex_acquire(&mutexArene, TM_INFINITE);
+			d_imageshop_draw_arena(image, arena);
+			rt_mutex_release(&mutexArene);
+		}
 		
 		rt_mutex_acquire(&mutexPositionRobot, TM_INFINITE);
     	d_imageshop_draw_position(image, positionRobot);
