@@ -103,6 +103,7 @@ void communiquer(void *arg) {
       
       switch (msg->get_type(msg)) { //on check le type du message reçu
 	
+<<<<<<< HEAD
 	/* Type Action */
       case MESSAGE_TYPE_ACTION:
 	rt_printf("tcommunicate : Le message %d reçu est une action\n", num_msg);
@@ -123,17 +124,17 @@ void communiquer(void *arg) {
       case ACTION_ARENA_IS_FOUND:
 	rt_printf("tcommunicate : Action 'valider arene'\n");
 	rt_sem_v(&semValidArene); //lance la validation de l'arene
-	/*rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
+	rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
 	areneValidee = 0;
-	rt_mutex_release(&mutexValidArene);*/
+	rt_mutex_release(&mutexValidArene);
 	break;
 	/* Type::Action::ArenaFailed */
       case ACTION_ARENA_FAILED:
 	rt_printf("tcommunicate : Action 'annuler arene'\n");
 	rt_sem_v(&semValidArene);
-	/*rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
+	rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
 	areneValidee = 1;
-	rt_mutex_release(&mutexValidArene);*/
+	rt_mutex_release(&mutexValidArene);
 	break;
       }
       break;
@@ -158,10 +159,11 @@ void communiquer(void *arg) {
     }
   }
   //commentaire
+
 }
 
 /* Author : 
- * State : 
+ * State : done
  */
 void deplacer(void *arg) {
   int status = 1;
