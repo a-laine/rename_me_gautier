@@ -28,6 +28,7 @@ extern RT_MUTEX mutexMove;
 extern RT_MUTEX mutexRobot;
 extern RT_MUTEX mutexServer;
 extern RT_MUTEX mutexArene;
+extern RT_MUTEX mutexFindingArena;
 extern RT_MUTEX mutexImage;
 extern RT_MUTEX mutexPositionRobot;
 extern RT_MUTEX mutexPositionVoulue;
@@ -48,6 +49,7 @@ extern RT_QUEUE queueMsgGUI;
 
 /* @variables partagées */
 extern int areneValidee;
+extern int findingArena;
 extern DServer *server;
 extern DRobot *robot;
 extern DMovement *mvt;

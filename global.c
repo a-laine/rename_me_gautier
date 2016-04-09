@@ -23,6 +23,7 @@ RT_MUTEX mutexMove;
 RT_MUTEX mutexRobot;
 RT_MUTEX mutexServer;
 RT_MUTEX mutexArene;
+RT_MUTEX mutexFindingArena;
 RT_MUTEX mutexImage;
 RT_MUTEX mutexPositionRobot;
 RT_MUTEX mutexPositionVoulue;
@@ -40,6 +41,7 @@ RT_SEM semMission;
 RT_QUEUE queueMsgGUI;
 
 int areneValidee;
+int findingArena;
 DRobot *robot;
 DMovement *mvt;
 DServer *server;
