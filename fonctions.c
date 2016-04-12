@@ -183,8 +183,9 @@ void deplacer(void *arg) {
 
 	rt_printf("tmove : Debut de l'éxecution de periodique à 1s\n");
 	rt_task_wait_period(NULL);
-		rt_printf("tmove : Activation périodique\n");
+		
 	while (1) {
+	rt_printf("tmove : Activation périodique\n");
 		/* Attente de l'activation périodique */
 		rt_task_wait_period(NULL);
 
@@ -219,9 +220,9 @@ void deplacer(void *arg) {
 			}
 			rt_mutex_release(&mutexMove);
 			
-			//rt_mutex_acquire(&mutexRobot, TM_INFINITE);
+			rt_mutex_acquire(&mutexRobot, TM_INFINITE);
 			status = robot->set_motors(robot, gauche, droite);
-			//rt_mutex_release(&mutexRobot);
+			rt_mutex_release(&mutexRobot);
 
 			if (status != STATUS_OK) {
 				rt_mutex_acquire(&mutexEtat, TM_INFINITE);

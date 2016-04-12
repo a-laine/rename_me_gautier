@@ -192,6 +192,8 @@ void initStruct(void) {
 	positionRobot = d_new_position();
 	positionVoulue = d_new_position();
 	etat_communication = malloc(sizeof(Etat_communication_t));
+	etat_communication->robot = 1;
+	etat_communication->moniteur = 1;
 }
 
 void startTasks() {
