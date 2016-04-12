@@ -343,9 +343,8 @@ void batteries(void *arg)
 	rt_sem_p(&semBattery, TM_INFINITE);
 
 	while(2) {
-		rt_task_wait_period(NULL);
-
 		do {
+			rt_task_wait_period(NULL);
 			rt_mutex_acquire(&mutexEtat, TM_INFINITE);
 			status = etat_communication->robot;
 			rt_mutex_release(&mutexEtat);
