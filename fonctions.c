@@ -11,9 +11,7 @@ void envoyer(void * arg) {
 
 	while (1) {
 		rt_task_wait_period(NULL);
-		rt_printf("tenvoyer : hello\n");
 		if ((err = rt_queue_read(&queueMsgGUI, &msg, sizeof (DMessage), TM_INFINITE)) >= 0) {
-			rt_printf("tenvoyer : envoi d'un message au moniteur\n");
 			rt_mutex_acquire(&mutexServer, TM_INFINITE);
 			server->send(server, msg);
 			msg->free(msg);
@@ -153,7 +151,7 @@ void communiquer(void *arg) {
 							break;
 						case ACTION_STOP_COMPUTE_POSITION:
 							rt_printf("tcommunicate : Action ' stop compute position'\n");
-							rt_sem_v(&semPosition);
+							rt_sem_p(&semPosition, TM_INFINITE);
 							break;
 					}
 					break;
@@ -312,10 +310,10 @@ void position(void *arg)
 	DPosition* tmpPositionRobot;
 	DMessage *message;
 	rt_printf("tposition : Attente du sémarphore semPosition\n");
-    rt_sem_p(&semPosition, TM_INFINITE);
     
     while(1)
     {
+    	rt_sem_p(&semPosition, TM_INFINITE);
     	rt_task_wait_period(NULL);
 		do {
 			rt_mutex_acquire(&mutexEtat, TM_INFINITE);
@@ -326,7 +324,6 @@ void position(void *arg)
 		
 		rt_mutex_acquire(&mutexImage, TM_INFINITE);
 			rt_mutex_acquire(&mutexArene, TM_INFINITE);
-				printf("tmpAreneValidee : %d, arena: %d\n",tmpAreneValidee,arena);
 				tmpPositionRobot = image->compute_robot_position(image,0);
 				if (tmpPositionRobot) {
 					rt_mutex_acquire(&mutexPositionRobot, TM_INFINITE);
@@ -341,7 +338,8 @@ void position(void *arg)
 					rt_mutex_release(&mutexPositionRobot);
 				}
 			rt_mutex_release(&mutexArene);
-		rt_mutex_release(&mutexImage);	
+		rt_mutex_release(&mutexImage);
+		rt_sem_v(&semPosition);	
 	}
 }
 
@@ -448,7 +446,6 @@ void webcam(void *arg)
 
 		// dessiner l'arene
 		rt_mutex_acquire(&mutexArene, TM_INFINITE);
-		printf("arena : %d\n", arena);
 		d_imageshop_draw_arena(image, arena);
 		rt_mutex_release(&mutexArene);
 		
