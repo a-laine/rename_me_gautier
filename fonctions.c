@@ -32,37 +32,31 @@ void connecter(void * arg) {
 	rt_printf("tconnect : Debut de l'exécution de tconnect\n");
 
 	while (1) {
-				rt_sem_v(&semWebcam);
-				rt_printf("tconnect : semWebcam free\n");
 		rt_printf("tconnect : Attente du sémaphore semConnecterRobot\n");
 		rt_sem_p(&semConnecterRobot, TM_INFINITE);
-		/*rt_printf("tconnect : Ouverture de la communication avec le robot\n");
-		//rt_mutex_acquire(&mutexRobot, TM_INFINITE);
-		rt_printf("mutex\n");
+		rt_printf("tconnect : Ouverture de la communication avec le robot\n");
+		
+		rt_mutex_acquire(&mutexRobot, TM_INFINITE);
 		status = robot->open_device(robot);
-		//rt_mutex_release(&mutexRobot);
-		rt_printf("texmu\n");
+		rt_mutex_release(&mutexRobot);
+		
 		rt_mutex_acquire(&mutexEtat, TM_INFINITE);
-		rt_printf("mutexEtat\n");
 		etat_communication->robot = status;
 		rt_mutex_release(&mutexEtat);
-		rt_printf("beforif\n");
-		//if (status == STATUS_OK) {
-			//rt_printf("status == status_ok\n");
-			//rt_mutex_acquire(&mutexRobot, TM_INFINITE);
-			//rt_printf("mutexRobot\n");
-			//status = robot->start_insecurely(robot); //met le robot en attente des ordres
-			///rt_mutex_release(&mutexRobot);
-			
-			//if (status == STATUS_OK){
-				//rt_sem_v(&semWatchdog);
-				//rt_sem_v(&semBattery);
+		
+		if (status == STATUS_OK) {
+			rt_mutex_acquire(&mutexRobot, TM_INFINITE);
+			status = robot->start_insecurely(robot); //met le robot en attente des ordres
+			rt_mutex_release(&mutexRobot);
+			if (status == STATUS_OK){
+				rt_sem_v(&semWatchdog);
+				rt_sem_v(&semBattery);
 				rt_sem_v(&semWebcam);
 				rt_printf("tconnect : semWebcam free\n");
-				//rt_printf("tconnect : Robot démarrer\n");
-			//}
-		//}
-*/
+				rt_printf("tconnect : Robot démarrer\n");
+			}
+		}
+
 		message = d_new_message();
 		message->put_state(message, status);
 
@@ -281,9 +275,9 @@ rt_printf("twatchdog : Attente du sémaphore semWatchdog\n");
 	while (1) {
 		rt_task_wait_period(NULL);
 		while (status == 1) {
-			//rt_mutex_acquire(&mutexRobot, TM_INFINITE);
+			rt_mutex_acquire(&mutexRobot, TM_INFINITE);
 			res = robot->reload_wdt(robot);
-			//rt_mutex_release(&mutexRobot);
+			rt_mutex_release(&mutexRobot);
 			status = test_robot_state(res);
 		}
 		message = d_new_message();
@@ -364,9 +358,9 @@ void batteries(void *arg)
 			rt_mutex_release(&mutexEtat);
 		} while(status == 1);
 
-		//rt_mutex_acquire(&mutexRobot, TM_INFINITE);
+		rt_mutex_acquire(&mutexRobot, TM_INFINITE);
 		status = robot->get_vbat(robot, &vbat);
-		//rt_mutex_release(&mutexRobot);
+		rt_mutex_release(&mutexRobot);
 
 		batterie->set_level(batterie, vbat);
 		message = d_new_message();
@@ -466,7 +460,7 @@ void webcam(void *arg)
 		message = d_new_message();
 		message->put_jpeg_image(message, jpgImage);
 		
-		rt_printf("twebcam : Envoi message\n");
+		//rt_printf("twebcam : Envoi message\n");
 		if (write_in_queue(&queueMsgGUI, message, sizeof (DMessage)) < 0) {
             message->free(message);
         }
