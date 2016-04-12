@@ -141,11 +141,19 @@ void communiquer(void *arg) {
 							break;
 						/* Type Action-ArenaFailed */
 						case ACTION_ARENA_FAILED:
-							rt_printf("tcommunicate : Action 'annuler arene'\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+							rt_printf("tcommunicate : Action 'annuler arene'\n");
 							rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
 							areneValidee = 2;
 							rt_mutex_release(&mutexValidArene);
 							rt_sem_v(&semValidArene); //lance la validation de l'arene
+							break;
+						case ACTION_COMPUTE_CONTINUOUSLY_POSITION:
+							rt_printf("tcommunicate : Action ' start compute position'\n");
+							rt_sem_v(&semPosition);
+							break;
+						case ACTION_STOP_COMPUTE_POSITION:
+							rt_printf("tcommunicate : Action ' stop compute position'\n");
+							rt_sem_v(&semPosition);
 							break;
 					}
 					break;
