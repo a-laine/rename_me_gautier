@@ -309,13 +309,6 @@ void position(void *arg)
     {
     	rt_sem_p(&semPosition, TM_INFINITE);
     	rt_task_wait_period(NULL);
-		do {
-			rt_mutex_acquire(&mutexEtat, TM_INFINITE);
-			status = etat_communication->robot;
-			rt_mutex_release(&mutexEtat);
-		} while(status == 1);
-		
-		
 		rt_mutex_acquire(&mutexImage, TM_INFINITE);
 			rt_mutex_acquire(&mutexArene, TM_INFINITE);
 				tmpPositionRobot = image->compute_robot_position(image,0);
