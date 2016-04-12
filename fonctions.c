@@ -34,29 +34,37 @@ void connecter(void * arg) {
 	rt_printf("tconnect : Debut de l'exécution de tconnect\n");
 
 	while (1) {
+				rt_sem_v(&semWebcam);
+				rt_printf("tconnect : semWebcam free\n");
 		rt_printf("tconnect : Attente du sémaphore semConnecterRobot\n");
 		rt_sem_p(&semConnecterRobot, TM_INFINITE);
-		rt_printf("tconnect : Ouverture de la communication avec le robot\n");
-		rt_mutex_acquire(&mutexRobot, TM_INFINITE);
+		/*rt_printf("tconnect : Ouverture de la communication avec le robot\n");
+		//rt_mutex_acquire(&mutexRobot, TM_INFINITE);
+		rt_printf("mutex\n");
 		status = robot->open_device(robot);
-		rt_mutex_release(&mutexRobot);
-
+		//rt_mutex_release(&mutexRobot);
+		rt_printf("texmu\n");
 		rt_mutex_acquire(&mutexEtat, TM_INFINITE);
+		rt_printf("mutexEtat\n");
 		etat_communication->robot = status;
 		rt_mutex_release(&mutexEtat);
-
-		if (status == STATUS_OK) {
-			rt_mutex_acquire(&mutexRobot, TM_INFINITE);
-			status = robot->start_insecurely(robot); //met le robot en attente des ordres
-			rt_mutex_release(&mutexRobot);
-			if (status == STATUS_OK){
-				rt_sem_v(&semWatchdog);
-				rt_sem_v(&semBattery);
+		rt_printf("beforif\n");
+		//if (status == STATUS_OK) {
+			//rt_printf("status == status_ok\n");
+			//rt_mutex_acquire(&mutexRobot, TM_INFINITE);
+			//rt_printf("mutexRobot\n");
+			//status = robot->start_insecurely(robot); //met le robot en attente des ordres
+			///rt_mutex_release(&mutexRobot);
+			
+			//if (status == STATUS_OK){
+				//rt_sem_v(&semWatchdog);
+				//rt_sem_v(&semBattery);
 				rt_sem_v(&semWebcam);
-				rt_printf("tconnect : Robot démarrer\n");
-			}
-		}
-
+				rt_printf("tconnect : semWebcam free\n");
+				//rt_printf("tconnect : Robot démarrer\n");
+			//}
+		//}
+*/
 		message = d_new_message();
 		message->put_state(message, status);
 
@@ -82,7 +90,7 @@ void communiquer(void *arg) {
 		/* Ouverture de la connexion */
 		// on est censé attendre la connexion de la part d'un socket a priori
 		rt_printf("tcommunicate : Début de l'exécution du Serveur\n");
-		server->open(server, "8000"); 
+		server->open(server, "8000");
 		rt_printf("tcommunicate : Connexion\n");
 
 		/* Etat ? */
@@ -118,6 +126,10 @@ void communiquer(void *arg) {
 						case ACTION_FIND_ARENA:
 							rt_printf("tcommunicate : Action 'demander acquisition'\n");
 							rt_sem_v(&semAcquArene); //lance l'acquisition de l'arene
+							rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
+							areneValidee = 1;
+							rt_mutex_release(&mutexValidArene);
+							rt_sem_v(&semValidArene); //lance la validation de l'arene
 							break;
 						/* Type Action-ArenaFound */
 						case ACTION_ARENA_IS_FOUND:
@@ -129,7 +141,7 @@ void communiquer(void *arg) {
 							break;
 						/* Type Action-ArenaFailed */
 						case ACTION_ARENA_FAILED:
-							rt_printf("tcommunicate : Action 'annuler arene'\n");
+							rt_printf("tcommunicate : Action 'annuler arene'\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
 							rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
 							areneValidee = 2;
 							rt_mutex_release(&mutexValidArene);
@@ -171,11 +183,11 @@ void deplacer(void *arg) {
 
 	rt_printf("tmove : Debut de l'éxecution de periodique à 1s\n");
 	rt_task_wait_period(NULL);
-
+		rt_printf("tmove : Activation périodique\n");
 	while (1) {
 		/* Attente de l'activation périodique */
 		rt_task_wait_period(NULL);
-		rt_printf("tmove : Activation périodique\n");
+
 
 		rt_mutex_acquire(&mutexEtat, TM_INFINITE);
 		status = etat_communication->robot;
@@ -206,8 +218,10 @@ void deplacer(void *arg) {
 					break;
 			}
 			rt_mutex_release(&mutexMove);
-
+			
+			//rt_mutex_acquire(&mutexRobot, TM_INFINITE);
 			status = robot->set_motors(robot, gauche, droite);
+			//rt_mutex_release(&mutexRobot);
 
 			if (status != STATUS_OK) {
 				rt_mutex_acquire(&mutexEtat, TM_INFINITE);
@@ -255,16 +269,15 @@ void watchdog(void *arg)
 	DMessage *message;
 
 	rt_printf("twatchdog : Debut de l'exécution de twatchdog\n");
-
-	while (1) {
-		rt_printf("twatchdog : Attente du sémaphore semWatchdog\n");
+rt_printf("twatchdog : Attente du sémaphore semWatchdog\n");
 		rt_sem_p(&semWatchdog, TM_INFINITE);
 		rt_printf("twatchdog : Ouverture de la communication avec le robot\n");
+	while (1) {
 		rt_task_wait_period(NULL);
 		while (status == 1) {
-			rt_mutex_acquire(&mutexRobot, TM_INFINITE);
+			//rt_mutex_acquire(&mutexRobot, TM_INFINITE);
 			res = robot->reload_wdt(robot);
-			rt_mutex_release(&mutexRobot);
+			//rt_mutex_release(&mutexRobot);
 			status = test_robot_state(res);
 		}
 		message = d_new_message();
@@ -362,9 +375,9 @@ void batteries(void *arg)
 			rt_mutex_release(&mutexEtat);
 		} while(status == 1);
 
-		rt_mutex_acquire(&mutexRobot, TM_INFINITE);
+		//rt_mutex_acquire(&mutexRobot, TM_INFINITE);
 		status = robot->get_vbat(robot, &vbat);
-		rt_mutex_release(&mutexRobot);
+		//rt_mutex_release(&mutexRobot);
 
 		batterie->set_level(batterie, vbat);
 		message = d_new_message();
@@ -389,13 +402,14 @@ void arene(void *arg)
 
 	while(1) {
 		rt_printf("tArene : Attente du sémarphore semAcquArene\n");
-		rt_sem_p(&semAcquArene, TM_INFINITE); //libéré par Communiquer() sur ACTION_FIND_ARENA
 
-		do {
+			rt_sem_p(&semAcquArene, TM_INFINITE); //libéré par Communiquer() sur ACTION_FIND_ARENA
+			rt_sem_p(&semValidArene, TM_INFINITE);
 			rt_mutex_acquire(&mutexImage, TM_INFINITE); //acquisition des mutex image et arene pour computer
 			rt_mutex_acquire(&mutexArene, TM_INFINITE);
 			if(arena)
 				arena->free(arena);
+
 			arena = image->compute_arena_position(image);
 			rt_mutex_release(&mutexArene);
 			rt_mutex_release(&mutexImage);
@@ -407,42 +421,16 @@ void arene(void *arg)
 			rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
 			valide = areneValidee;
 			rt_mutex_release(&mutexValidArene);
+
 			if(valide == 2){ //Annulation de la demande
 				rt_mutex_acquire(&mutexArene, TM_INFINITE);
-				arena->free(arena); //on free l'arène (tant pis)
-				arena = 0;
+				if(arena) {
+					arena->free(arena); //on free l'arène (tant pis)
+					arena = 0;
+				}
 				rt_mutex_release(&mutexArene);
 			}
-		} while(valide != 0); //tant que l'arène n'est pas validée, on recompute
 	} 
-
-	/* VERSION 2 :
-	while(1) {
-		rt_printf("tArene : Attente du sémarphore semAcquArene\n");
-		rt_sem_p(&semAcquArene, TM_INFINITE); //libéré par Communiquer() sur ACTION_FIND_ARENA
-
-		rt_mutex_acquire(&mutexImage, TM_INFINITE); //acquisition des mutex image et arene pour computer
-		rt_mutex_acquire(&mutexArene, TM_INFINITE);
-		if(arena)
-			arena->free(arena);
-		arena = image->compute_arena_position(image);
-		rt_mutex_release(&mutexArene);
-		rt_mutex_release(&mutexImage);
-
-		// Demander la validation de l'arene
-		rt_printf("tArene : Attente du sémaphore semValidArene\n");
-		rt_sem_p(&semValidArene, TM_INFINITE);
-
-		rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
-		valide = areneValidee;
-		rt_mutex_release(&mutexValidArene);
-		if(valide != 0){ // arene non validee
-			rt_mutex_acquire(&mutexArene, TM_INFINITE);
-			arena->free(arena); //on free l'arène (tant pis)
-			arena = 0;
-			rt_mutex_release(&mutexArene);
-		}
-	} */
 }
 
 /* Author : Aurélien Lainé
@@ -455,21 +443,21 @@ void webcam(void *arg)
 	DCamera* camera = d_new_camera();
 	DJpegimage* jpgImage = d_new_jpegimage();
 	
-	rt_printf("tWebcam : Attente du sémarphore semBattery\n");
-    rt_sem_p(&semBattery, TM_INFINITE);
-    
+	printf("tWebcam : Attente du sémarphore semWebcam\n");
+    rt_sem_p(&semWebcam, TM_INFINITE);
     camera->open(camera);
-    
+
     while(1)
     {
     	rt_task_wait_period(NULL);
-    	
+
     	rt_mutex_acquire(&mutexImage, TM_INFINITE);
-    	
-		camera->get_frame(webcam, image); //acquisition d'une DImage
-    	
+
+		camera->get_frame(camera, image); //acquisition d'une DImage
+
 		// dessiner l'arene
 		rt_mutex_acquire(&mutexArene, TM_INFINITE);
+		printf("arena : %d\n", arena);
 		d_imageshop_draw_arena(image, arena);
 		rt_mutex_release(&mutexArene);
 		
