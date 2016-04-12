@@ -325,40 +325,23 @@ void position(void *arg)
 		
 		
 		rt_mutex_acquire(&mutexImage, TM_INFINITE);
-		rt_mutex_acquire(&mutexValidArene, TM_INFINITE);
-		tmpAreneValidee = areneValidee;
-		rt_mutex_release(&mutexValidArene);
-		if(tmpAreneValidee == 1)
-		{
 			rt_mutex_acquire(&mutexArene, TM_INFINITE);
-			tmpPositionRobot = image->compute_robot_position(image,arena);
-			if(tmpPositionRobot == 0) // a verifier
-			{
-				//erreur
-			}
+				printf("tmpAreneValidee : %d, arena: %d\n",tmpAreneValidee,arena);
+				tmpPositionRobot = image->compute_robot_position(image,0);
+				if (tmpPositionRobot) {
+					rt_mutex_acquire(&mutexPositionRobot, TM_INFINITE);
+						d_position_free(positionRobot);
+						positionRobot = tmpPositionRobot;
+						message = d_new_message();
+						message->put_position(message, positionRobot);
+						rt_printf("tposition : Envoi message\n");
+						if (write_in_queue(&queueMsgGUI, message, sizeof (DMessage)) < 0) {
+							message->free(message);
+						}
+					rt_mutex_release(&mutexPositionRobot);
+				}
 			rt_mutex_release(&mutexArene);
-		}
-		else
-		{
-			tmpPositionRobot = image->compute_robot_position(image,0);
-			if(tmpPositionRobot == 0) // a verifier
-			{
-				//erreur
-			}
-		}
-		rt_mutex_release(&mutexImage);
-		
-		rt_mutex_acquire(&mutexPositionRobot, TM_INFINITE);
-		d_position_free(positionRobot);
-		positionRobot = tmpPositionRobot;
-		message = d_new_message();
-		message->put_position(message, positionRobot);
-		rt_mutex_release(&mutexPositionRobot);
-		
-		rt_printf("tbatteries : Envoi message\n");
-		if (write_in_queue(&queueMsgGUI, message, sizeof (DMessage)) < 0) {
-			message->free(message);
-		}
+		rt_mutex_release(&mutexImage);	
 	}
 }
 
